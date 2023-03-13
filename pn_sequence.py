@@ -77,19 +77,30 @@ init_seqs.remove([0, 0, 0, 0])
 taps = init_seqs.copy()
 
 seqs = []
+init_bit_tap = []
 for i in range(len(init_seqs)):
     for j in range(len(taps)):
         output = lfsr(init_seqs[i], taps[j])
         if output is not None:
+            init_bit_tap.append([init_seqs[i], taps[j]])
             seqs.append(output)
 
 print('Number of sequence produce by LFSR: {}'.format(len(seqs)))
 
 n = 0
 output_file = open('output.txt', 'w')
-for s in seqs:
-    if pn_seq(s):
-        print(s)
+for i in range(len(seqs)):
+    if pn_seq(seqs[i]):
+        init_bit, tap = init_bit_tap[i]
+        tap_idx = [i for i in range(len(tap)) if tap[i] == 1]
+        print('init bits: {}'.format(init_bit))
+        print('tap: {}'.format(tap_idx))
+        print(seqs[i])
         n += 1
-        output_file.write(''.join(str(b) for b in s) + '\n')
+        output_file.write('init bits: {}\n'.format(''.join(
+            str(b) for b in init_bit)))
+        output_file.write('tap: {}\n'.format(','.join(str(t)
+                                                      for t in tap_idx)))
+        output_file.write(''.join(str(b) for b in seqs[i]) + '\n')
 print('Number of pn-sequence: {}'.format(n))
+output_file.close()
