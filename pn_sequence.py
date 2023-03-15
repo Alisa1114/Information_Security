@@ -1,20 +1,20 @@
 import itertools
-import collections
 
 
 def pn_seq(seq):
     # R1
-    r1 = 0
+    num1 = 0
+    num0 = 0
     for i in range(len(seq)):
         if seq[i] == 1:
-            r1 += 1
+            num1 += 1
         else:
-            r1 -= 1
-    if abs(r1) > 1:
+            num0 += 1
+    if abs(num1 - num0) > 1:
         return False
 
     # R2
-    runs = collections.defaultdict(int)
+    runs = [0] * len(seq)
     previous = seq[0]
     length = 1
     for i in range(1, len(seq)):
@@ -26,9 +26,11 @@ def pn_seq(seq):
             length += 1
     runs[length] += 1
 
-    num_runs = len(runs.keys())
+    num_runs = sum(runs)
+    # print(runs)
+
     for i in range(1, num_runs):
-        n = num_runs // (2**i)
+        n = num_runs / (2**i)
         if n < 1:
             break
         if runs[i] < n:
@@ -36,17 +38,21 @@ def pn_seq(seq):
 
     # R3
     correlation = []
+    shift_list = seq.copy()
     for t in range(len(seq)):
         c = 0
         for i in range(len(seq)):
-            n1 = 2 * seq[i] - 1
-            n2 = 2 * seq[(i + t) % len(seq)] - 1
-            c += n1 * n2
+            if seq[i] == shift_list[i]:
+                c += 1
+            else:
+                c -= 1
+        # 讓list往右shift一格
+        shift_list.insert(0, shift_list.pop())
         correlation.append(c)
     correlation = set(correlation)
     if len(correlation) > 2 or len(seq) not in correlation:
         return False
-    print(correlation)
+
     return True
 
 
@@ -101,6 +107,7 @@ for i in range(len(seqs)):
             str(b) for b in init_bit)))
         output_file.write('tap: {}\n'.format(','.join(str(t)
                                                       for t in tap_idx)))
-        output_file.write(''.join(str(b) for b in seqs[i]) + '\n')
+        output_file.write('pn-seq: ' + ''.join(str(b)
+                                               for b in seqs[i]) + '\n\n')
 print('Number of pn-sequence: {}'.format(n))
 output_file.close()
